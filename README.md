@@ -1,54 +1,37 @@
-# Astro Starter Kit: Basics
+# Grabadora de pantalla
+
+Aplicación web para grabar la pantalla directamente desde el navegador, sin instalar nada. Permite grabar una pestaña, una ventana de aplicación o toda la pantalla, y descargar el resultado en formato **WebM**.
+
+## Cómo funciona
+
+Utiliza las APIs nativas del navegador:
+
+- **`getDisplayMedia`** para capturar vídeo (y audio) de la pantalla.
+- **`MediaRecorder`** para codificar la grabación en tiempo real.
+
+No requiere servidor ni backend: todo el procesamiento ocurre en el cliente y la descarga se genera localmente.
+
+## Características
+
+- Grabación de pestaña, aplicación o pantalla completa.
+- Formatos WebM con VP9, AV1 o H264 (según soporte del navegador).
+- Selección de resolución (nativa hasta 4K) y opción de bitrate mejorado (×4).
+- Temporizador de duración en directo.
+- Previsualización y descarga del vídeo al terminar.
+
+## Requisitos
+
+Un navegador de escritorio compatible (Chrome, Edge, Firefox...). La aplicación comprueba la compatibilidad al cargar; en navegadores sin las APIs necesarias se muestra un aviso.
+
+> Nota: los navegadores solo permiten capturar pantalla en contexto seguro (**HTTPS** o `localhost`).
+
+## Desarrollo
+
+Proyecto estático construido con [Astro](https://astro.build).
 
 ```sh
-npm create astro@latest -- --template basics
+npm install     # Instalar dependencias
+npm run dev     # Servidor de desarrollo en localhost:4321
+npm run build   # Build de producción en ./dist/
+npm run preview # Previsualizar el build
 ```
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

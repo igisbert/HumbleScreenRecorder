@@ -66,7 +66,7 @@ let screenStream; // Declara la variable fuera de las funciones para que sea acc
 
 // Botón de inicio de grabación
 start.addEventListener("click", () => {
-  if (!isSupported /* || screenStream */) {
+  if (!isSupported) {
     alert("Navegador no compatible con esta aplicación");
     return;
   }
@@ -106,8 +106,6 @@ start.addEventListener("click", () => {
   bitrate = bitrates[height] ?? 6000000;
 
   if (bitrateSwitch.checked) bitrate = bitrate * 4;
-
-  console.log(bitrateSwitch.checked);
 
   navigator.mediaDevices
     .getDisplayMedia({

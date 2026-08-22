@@ -10,8 +10,12 @@ const showDialog = () => {
 
 const closeDialog = () => {
     dialog.close();
-    body.style.overflow = "auto";
 }
+
+// Fires no matter how the dialog is closed (button, Escape, ...)
+dialog.addEventListener("close", () => {
+    body.style.overflow = "auto";
+});
 
 ShowButton.addEventListener("click", showDialog);
 CloseButton.addEventListener("click", closeDialog);
