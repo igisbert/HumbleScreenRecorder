@@ -146,48 +146,35 @@ start.addEventListener("click", () => {
       }
 
       const chunks = [];
+      let recordedVideoURL = null;
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunks.push(event.data);
-
-          const url = URL.createObjectURL(event.data);
-
-          /*  const link = document.createElement("a");
-          link.href = URL.createObjectURL(event.data);
-          link.download = `${fileNameValue}.webm`;
-          link.textContent = "Download"; */
-          /* body.appendChild(link); */
-
-          const videoContainer = document.querySelector("#video-menu");
-          const videoElement = document.querySelector("#preview-video");
-          const downloadButton = document.querySelector("#download-button")
-          videoElement.src = url;
-          downloadButton.href = url;
-          downloadButton.download = `${fileNameValue}.webm`;
-          videoContainer.classList.add("video-container-visible");
         }
       };
 
       mediaRecorder.onstop = () => {
         stopTimer();
-        const recordedBlob = new Blob(chunks, { type: "video/webm" });
-
-        // Crear una URL de objeto para el Blob
-        const videoURL = URL.createObjectURL(recordedBlob);
-
-        // Obtener la etiqueta de video por su ID
-
         led.classList.remove("recording-led-active");
         start.disabled = false;
 
-        // Asignar la URL al src del elemento video
-        /* videoElement.src = videoURL; */
-        // Liberar la URL de objeto cuando no sea necesaria para evitar pérdida de memoria
-        /*       videoElement.onloadeddata = () => {
-          URL.revokeObjectURL(videoURL);
-        };
- */
+        const recordedBlob = new Blob(chunks, { type: "video/webm" });
+
+        if (recordedVideoURL) URL.revokeObjectURL(recordedVideoURL);
+        recordedVideoURL = URL.createObjectURL(recordedBlob);
+
+        const videoContainer = document.querySelector("#video-menu");
+        const videoElement = document.querySelector("#preview-video");
+        const downloadButton = document.querySelector("#download-button");
+
+        videoElement.src = recordedVideoURL;
+        downloadButton.href = recordedVideoURL;
+        downloadButton.download = `${fileNameValue}.webm`;
+        videoContainer.classList.add("video-container-visible");
+
+        screenStream.getTracks().forEach((track) => track.stop());
+        screenStream = null;
       };
 
       mediaRecorder.start();
