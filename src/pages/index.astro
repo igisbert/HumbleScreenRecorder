@@ -1,0 +1,30 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+import Underline from "../components/Underline.astro";
+import Bento from "../components/Bento.astro";
+import Dialog from "../components/Dialog.astro";
+import SideMenu from "../components/SideMenu.astro";
+---
+
+<Layout title="Grabadora de pantalla">
+  <header>
+    <div>
+      <h1 class="title">Grabadora de pantalla</h1>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <Bento />
+      <div class="background-beauty"></div>
+    </div>
+  </main>
+  <footer>
+    <div><h3>Creado por <Underline text="Iñaki Gisbert" /></h3></div>
+  </footer>
+  <Dialog />
+  <SideMenu />
+</Layout>
+
+<script src="../assets/screenrecorder.js"></script>
+<script src="../assets/showDialog.js"></script>

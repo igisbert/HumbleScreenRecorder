@@ -1,0 +1,349 @@
+:root {
+  --bg-color: #0e0e0e; /* #ffe6e6 modo claro */
+  --text-color: #fff;
+  --primary_color: #1c1c1c; /* #fff1f1 */
+  --recording-color: #b33131;
+  --recording-glow:
+    0 0 39px 5px var(--recording-color), 0 0 37px 7px #a32626,
+    0 0 63px 9px #e30404;
+  --button-color: #e1d1d1;
+  --button-body-color: #131313;
+  --lines-color: #ffffff45;
+  --max-width: 1200px;
+  --dropdown-color: #2d2d2d;
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  src: url("ubuntu.woff2") format("woff2");
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+body {
+  font-family: "Ubuntu", sans-serif;
+  min-height: 100lvh;
+  margin: 0;
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0 1rem; /* put this in media query */
+}
+
+header {
+  max-width: var(--max-width);
+  width: 100%;
+  background-color: transparent;
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  /* margin-top: 2rem; */
+  color: var(--text-color);
+}
+
+header div {
+  background-color: var(--primary_color);
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 4px 4px 10px 3px #0000005c;
+}
+
+main {
+  max-width: var(--max-width);
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bento {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(100px, auto);
+  grid-gap: 1.5rem;
+  /* padding: 2rem; */
+}
+
+.item {
+  background-color: var(--primary_color);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 4px 4px 10px 3px #0000005c;
+  /* backdrop-filter: blur(10px); */
+}
+
+.info {
+  grid-column: span 9;
+}
+
+.text-balanced {
+  text-wrap: balance;
+}
+
+.title {
+  margin: 1rem;
+  font-size: 3rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.recording {
+  grid-column: span 3;
+  grid-row: span 2;
+}
+
+.compatibilidad {
+  grid-column: span 6;
+}
+
+.instrucciones {
+  grid-column: span 3;
+}
+
+.instructions-button {
+  border: none;
+  border-radius: 4rem;
+  background-color: var(--button-body-color);
+  cursor: pointer;
+  box-shadow: 4px 4px 7px 3px #00000073;
+  transition:
+    filter 0.3s ease,
+    transform 0.3s ease;
+  color: white;
+  padding: 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-family: "Ubuntu", sans-serif;
+}
+
+.instructions-button:hover {
+  filter: brightness(1.2);
+  transform: scale(1.05);
+  color: var(--button-color);
+}
+
+.text-short {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  text-wrap: balance;
+}
+
+.nombre {
+  grid-column: span 4;
+}
+
+.configurations {
+  grid-column: span 6;
+  grid-row: span 3;
+  display: flex;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.configurations-container {
+  display: flex;
+  flex-grow: 1;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  gap: 1rem;
+}
+
+@media (width < 1000px) {
+  .configurations-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.controls {
+  grid-column: span 6;
+  grid-row: span 2;
+}
+
+.control-button {
+  border: none;
+  width: 12rem;
+  border-radius: 4rem;
+  background-color: var(--button-body-color);
+  cursor: pointer;
+  box-shadow: 4px 4px 7px 3px #00000073;
+  transition:
+    filter 0.3s ease,
+    transform 0.3s ease;
+}
+
+.control-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+
+  &:hover {
+    filter: none;
+    transform: none;
+  }
+}
+
+.control-button svg {
+  height: 6rem;
+  aspect-ratio: 1;
+  color: var(--button-color);
+}
+
+.control-button:hover {
+  filter: saturate(1000%);
+  transform: scale(1.05);
+}
+
+.small {
+  grid-column: span 2;
+}
+
+@media (width < 770px) {
+  .item {
+    grid-column: span 12 !important;
+    grid-row: span 1 !important;
+  }
+  .compatibilidad {
+    order: -1;
+  }
+}
+
+@media (width < 1000px) {
+  .instrucciones {
+    grid-column: span 4;
+  }
+  .compatibilidad {
+    grid-column: span 8;
+  }
+  .recording {
+    grid-row: span 1;
+  }
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-gap {
+  gap: 2rem;
+}
+
+.recording-led {
+  width: 25%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--recording-color);
+  opacity: 0.5;
+  transition:
+    opacity 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.recording-led-active {
+  opacity: 1;
+  box-shadow: var(--recording-glow);
+}
+
+footer {
+  background-color: var(--primary_color);
+  background-color: transparent;
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  color: var(--text-color);
+  border-radius: 1rem;
+}
+
+footer div {
+  background-color: var(--primary_color);
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1rem 2rem;
+  box-shadow: 4px 4px 10px 3px #0000005c;
+}
+
+.duration {
+  font-weight: bold;
+  letter-spacing: 4px;
+}
+
+.background-beauty {
+  position: absolute;
+  width: 20%;
+  aspect-ratio: 1;
+  background: #79474d20;
+  border-radius: 50%;
+  z-index: -1;
+  box-shadow: 0px 0px 62px 144px #79474d20;
+  top: 50%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  filter: blur(80px);
+}
+
+.hidden {
+  display: none;
+}
+
+.wobble-hor-bottom {
+  animation: wobble-hor-bottom 0.8s both;
+}
+
+.video-container-visible {
+  transform: translateY(-50%) !important;
+}
+
+/* ----------------------------------------------
+ * Generated by Animista on 2024-2-5 1:57:27
+ * Licensed under FreeBSD License.
+ * See http://animista.net/license for more info. 
+ * w: http://animista.net, t: @cssanimista
+ * ---------------------------------------------- */
+
+@keyframes wobble-hor-bottom {
+  0%,
+  100% {
+    transform: translateX(0);
+    transform-origin: 50% 50%;
+  }
+  15% {
+    transform: translateX(-25px) rotate(-6deg);
+  }
+  30% {
+    transform: translateX(15px) rotate(6deg);
+  }
+  45% {
+    transform: translateX(-15px) rotate(-3.6deg);
+  }
+  60% {
+    transform: translateX(9px) rotate(2.4deg);
+  }
+  75% {
+    transform: translateX(-6px) rotate(-1.2deg);
+  }
+}

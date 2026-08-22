@@ -1,0 +1,47 @@
+---
+import RecordIcon from "../components/RecordIcon.astro";
+import StopIcon from "../components/StopIcon.astro";
+import TextInput from "../components/TextInput.astro";
+import Loader from "../components/Loader.astro";
+import RadioButtons from "../components/RadioButtons.astro";
+import ResolutionAndBitrateSelector from "./ResolutionAndBitrateSelector.astro";
+---
+
+<div class="bento">
+  <div class="item info">
+    <h3 class="text-balanced">
+      Graba lo que ocurre en tu pantalla en formato WEBM.<br>
+      Graba una pestaña, graba una aplicación o todo lo que ocurra en tu pantalla.
+    </h3>
+  </div>
+  <div class="item recording flex-center">
+    <div class="recording-led"></div>
+  </div>
+  <div id="mediaRecorderCheck" class="item compatibilidad flex-center">
+    <Loader />
+  </div>
+  <div class="item instrucciones">
+    <button id="instructions-button" class="instructions-button">
+      Instrucciones
+    </button>
+  </div>
+  <div class="item configurations">
+    <h3>Escoge tus preferencias</h3>
+    <div class="configurations-container">
+      <RadioButtons />
+      <ResolutionAndBitrateSelector />
+    </div>
+  </div>
+  <div class="item nombre"><TextInput /></div>
+  <div class="item small">
+    <span id="duration" class="duration" >--:--:--</span>
+  </div>
+  <div class="item controls flex-center flex-row flex-gap">
+    <button class="control-button" id="start" title="Grabar pantalla">
+      <RecordIcon />
+    </button>
+    <button class="control-button" id="stop" title="Detener grabación">
+      <StopIcon />
+    </button>
+  </div>
+</div>
