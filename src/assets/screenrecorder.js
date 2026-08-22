@@ -47,35 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const detectMediarecorder = () => {
   const check = document.getElementById("mediaRecorderCheck");
-  const hideIfNotSupported = document.querySelectorAll(
-    '[data-hide-if-not-supported="true"]'
-  );
 
-  if (navigator.userAgentData != undefined) {
-    const userAgent = navigator.userAgentData;
+  const apisAvailable =
+    typeof MediaRecorder !== "undefined" &&
+    navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getDisplayMedia === "function";
 
-    if (userAgent.mobile === true) {
-      check.innerHTML = `<p class="text-short">Tu navegador no es compatible con esta aplicación ❌</p>`;
-      isSupported = false;
-    } else {
-      check.innerHTML = `<p class="text-short">Tu navegador es compatible con esta aplicación ✔️</p>`;
-      isSupported = true;
-    }
-
-    return;
-  }
-
-  const userAgent = navigator.userAgent.toLowerCase();
-  const mobileKeywords = [
-    "iphone",
-    "ipad",
-    "ipod",
-    "android",
-    "blackberry",
-    "windows phone",
-  ];
-
-  if (mobileKeywords.some((keyword) => userAgent.includes(keyword))) {
+  if (!apisAvailable) {
     check.innerHTML = `<p class="text-short">Tu navegador no es compatible con esta aplicación ❌</p>`;
     isSupported = false;
   } else {
@@ -108,6 +86,11 @@ start.addEventListener("click", () => {
     "webm";
 
   videoFormatCodec = formats[videoFormat];
+
+  if (!videoFormatCodec || !MediaRecorder.isTypeSupported(videoFormatCodec)) {
+    alert("Tu navegador no soporta el formato de vídeo seleccionado");
+    return;
+  }
 
   const resolution = document.querySelector("#selected-resolution").dataset
     .value;
@@ -142,13 +125,26 @@ start.addEventListener("click", () => {
       led.classList.add("recording-led-active");
       screenStream = stream; // Almacena el stream en la variable para que pueda ser accedido en toda la aplicación
 
-      const options = {
-        mimeType: videoFormatCodec,
-        videoBitsPerSecond: bitrate,
-        //37600000000
-      };
+      let mediaRecorder;
 
-      const mediaRecorder = new MediaRecorder(screenStream, options);
+      try {
+        const options = {
+          mimeType: videoFormatCodec,
+          videoBitsPerSecond: bitrate,
+        };
+
+        mediaRecorder = new MediaRecorder(screenStream, options);
+      } catch (error) {
+        console.error("Error al crear el MediaRecorder: ", error);
+        alert("Tu navegador no soporta el formato de vídeo seleccionado");
+        stopTimer();
+        led.classList.remove("recording-led-active");
+        start.disabled = false;
+        screenStream.getTracks().forEach((track) => track.stop());
+        screenStream = null;
+        return;
+      }
+
       const chunks = [];
 
       mediaRecorder.ondataavailable = (event) => {
