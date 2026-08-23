@@ -194,15 +194,17 @@ main {
 
 .reopen-tab {
   position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translate(-50%, 100%);
+  margin-top: 0.5rem;
+  top: 0;
+  scale: 0.75;
+  transform-origin: top center;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.55rem 0.95rem;
   border: none;
   border-radius: 999px;
+
   background-color: var(--primary_color);
   color: var(--button-color);
   cursor: pointer;
@@ -211,7 +213,7 @@ main {
   pointer-events: none;
   transition:
     opacity 0.3s ease,
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    scale 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reopen-tab svg {
@@ -221,7 +223,7 @@ main {
 
 .reopen-tab.is-visible {
   opacity: 1;
-  transform: translate(-50%, 55%);
+  scale: 1;
   pointer-events: auto;
 }
 
