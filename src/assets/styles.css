@@ -214,6 +214,10 @@ main {
   grid-column: span 2;
 }
 
+.timer {
+  container-type: inline-size;
+}
+
 @media (width < 770px) {
   .item {
     grid-column: span 12 !important;
@@ -289,7 +293,9 @@ footer div {
 
 .duration {
   font-weight: bold;
-  letter-spacing: 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: clamp(1px, 2cqi, 4px);
+  font-size: clamp(1rem, 8cqi, 1.5rem);
 }
 
 .background-beauty {
