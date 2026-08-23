@@ -286,23 +286,20 @@ main {
 }
 
 footer {
-  background-color: var(--primary_color);
-  background-color: transparent;
   padding: 1.5rem 0;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto;
   color: var(--text-color);
-  border-radius: 1rem;
 }
 
 footer div {
-  background-color: var(--primary_color);
   width: 100%;
-  border-radius: 1rem;
-  padding: 1rem 2rem;
-  box-shadow: 4px 4px 10px 3px #0000005c;
+  text-align: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  color: #ffffff80;
 }
 
 .duration {
