@@ -6,19 +6,11 @@ import Switch from "./Switch.astro"
   <h4>Elige la resolución</h4>
 
   <div class="select-container">
-    <button id="selected-resolution" class="select-label" popovertarget="resolution-popover" data-value="native">
+    <button id="selected-resolution" class="select-label" popovertarget="resolution-popover">
       <span class="select-text">Nativa</span>
       <span class="select-arrow"></span>
     </button>
-    <div id="resolution-popover" class="select-options" popover="auto">
-      <button class="select-option active" data-value="native">Nativa</button>
-      <button class="select-option" data-value="2160">3840 × 2160</button>
-      <button class="select-option" data-value="1440">2560 × 1440</button>
-      <button class="select-option" data-value="1080">1920 × 1080</button>
-      <button class="select-option" data-value="768">1366 × 768</button>
-      <button class="select-option" data-value="720">1280 × 720</button>
-      <button class="select-option" data-value="480">854 × 480</button>
-    </div>
+    <div id="resolution-popover" class="select-options" popover="auto"></div>
   </div>
 
   <h4>Mejorar bitrate</h4>
@@ -98,7 +90,7 @@ import Switch from "./Switch.astro"
     }
   }
 
-  .select-option {
+  .select-options :global(.select-option) {
     display: block;
     width: 100%;
     border: none;
@@ -117,8 +109,8 @@ import Switch from "./Switch.astro"
     }
   }
 
-  .select-option:hover,
-  .select-option.active {
+  .select-options :global(.select-option:hover),
+  .select-options :global(.select-option.active) {
     background-color: var(--recording-color);
   }
 
@@ -152,39 +144,57 @@ import Switch from "./Switch.astro"
   const popover = document.querySelector(
     "#resolution-popover"
   ) as HTMLDivElement;
-  const selectOptionList = popover.querySelectorAll(
-    ".select-option"
-  ) as NodeListOf<HTMLButtonElement>;
 
-  const screenHeight = window.screen.height;
+  const roundEven = (n: number) => Math.round(n / 2) * 2;
 
-  selectOptionList.forEach((option) => {
-    const value = parseInt(option.dataset.value ?? "", 10);
+  const buildOptions = () => {
+    const dpr = window.devicePixelRatio || 1;
+    const nativeWidth = Math.round(screen.width * dpr);
+    const nativeHeight = Math.round(screen.height * dpr);
 
-    if (!Number.isNaN(value) && value > screenHeight) {
-      option.style.display = "none";
-    }
-  });
-
-  const setActiveOption = () => {
-    selectOptionList.forEach((option) => {
-      option.classList.toggle("active", option.dataset.value === selectedResolution.dataset.value);
-    });
+    return [
+      { label: "Nativa", width: nativeWidth, height: nativeHeight },
+      { label: `${roundEven(nativeWidth * 0.75)} × ${roundEven(nativeHeight * 0.75)}`, width: roundEven(nativeWidth * 0.75), height: roundEven(nativeHeight * 0.75) },
+      { label: `${roundEven(nativeWidth * 0.5)} × ${roundEven(nativeHeight * 0.5)}`, width: roundEven(nativeWidth * 0.5), height: roundEven(nativeHeight * 0.5) },
+      { label: `${roundEven(nativeWidth * 0.25)} × ${roundEven(nativeHeight * 0.25)}`, width: roundEven(nativeWidth * 0.25), height: roundEven(nativeHeight * 0.25) },
+    ];
   };
+
+  const setActiveOption = (activeButton: HTMLButtonElement) => {
+    popover
+      .querySelectorAll(".select-option")
+      .forEach((option) => option.classList.remove("active"));
+    activeButton.classList.add("active");
+  };
+
+  const options = buildOptions();
+
+  selectedResolution.dataset.width = String(options[0].width);
+  selectedResolution.dataset.height = String(options[0].height);
+
+  options.forEach(({ label, width, height }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "select-option";
+    button.textContent = label;
+    button.dataset.width = String(width);
+    button.dataset.height = String(height);
+
+    button.addEventListener("click", () => {
+      selectText.textContent = label;
+      selectedResolution.dataset.width = String(width);
+      selectedResolution.dataset.height = String(height);
+
+      setActiveOption(button);
+      popover.hidePopover();
+      selectedResolution.focus();
+    });
+
+    popover.appendChild(button);
+  });
 
   popover.addEventListener("toggle", (event) => {
     const toggleEvent = event as ToggleEvent;
     container.classList.toggle("open", toggleEvent.newState === "open");
-  });
-
-  selectOptionList.forEach((option) => {
-    option.addEventListener("click", () => {
-      selectText.textContent = option.textContent;
-      selectedResolution.dataset.value = option.dataset.value;
-
-      setActiveOption();
-      popover.hidePopover();
-      selectedResolution.focus();
-    });
   });
 </script>

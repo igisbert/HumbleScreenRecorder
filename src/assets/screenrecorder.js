@@ -15,28 +15,10 @@ let bitrate;
 let startTime; // Variable para almacenar el tiempo de inicio
 let timeInterval; // Variable para almacenar el ID del intervalo
 
-const resolutions = {
-  2160: { width: 3840, height: 2160 },
-  1440: { width: 2560, height: 1440 },
-  1080: { width: 1920, height: 1080 },
-  768: { width: 1366, height: 768 },
-  720: { width: 1280, height: 720 },
-  480: { width: 854, height: 480 },
-};
-
 const formats = {
   webmh264: "video/webm; codecs=h264",
   webmav1: "video/webm; codecs=av1",
   webmvp9: "video/webm; codecs=vp9",
-};
-
-const bitrates = {
-  2160: 20000000,
-  1440: 10000000,
-  1080: 6000000,
-  768: 3500000,
-  720: 3000000,
-  480: 1500000,
 };
 
 let isSupported;
@@ -96,18 +78,12 @@ start.addEventListener("click", () => {
     return;
   }
 
-  const resolution = document.querySelector("#selected-resolution").dataset
-    .value;
+  const selectedResolution = document.querySelector("#selected-resolution");
 
-  if (resolution === "native") {
-    width = screen.width;
-    height = screen.height;
-  } else {
-    width = resolutions[resolution].width;
-    height = resolutions[resolution].height;
-  }
+  width = Number(selectedResolution.dataset.width) || screen.width;
+  height = Number(selectedResolution.dataset.height) || screen.height;
 
-  bitrate = bitrates[height] ?? 6000000;
+  bitrate = Math.round((width * height * 60 * 0.05) / 100000) * 100000;
 
   if (bitrateSwitch.checked) bitrate = bitrate * 4;
 
