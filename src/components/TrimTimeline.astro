@@ -1,0 +1,196 @@
+---
+---
+
+<div class="trim-timeline" id="trim-timeline" hidden>
+  <div class="trim-track">
+    <div class="trim-fill" id="trim-fill"></div>
+    <input type="range" id="trim-start" min="0" max="0" step="0.01" value="0" aria-label="Inicio del recorte" />
+    <input type="range" id="trim-end" min="0" max="0" step="0.01" value="0" aria-label="Fin del recorte" />
+  </div>
+  <p class="trim-info">
+    <span id="trim-selection">--:--</span>
+  </p>
+</div>
+
+<style>
+  .trim-timeline {
+    width: 100%;
+    margin-top: 1.25rem;
+  }
+
+  .trim-track {
+    position: relative;
+    height: 8px;
+    background-color: var(--button-body-color);
+    border-radius: 4px;
+  }
+
+  .trim-fill {
+    position: absolute;
+    inset-block: 0;
+    background-color: var(--recording-color);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .trim-track input[type="range"] {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -7px;
+    bottom: -7px;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .trim-track input[type="range"]::-webkit-slider-runnable-track {
+    background: transparent;
+  }
+
+  .trim-track input[type="range"]::-moz-range-track {
+    background: transparent;
+  }
+
+  .trim-track input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 24px;
+    border-radius: 5px;
+    border: none;
+    background: var(--text-color);
+    box-shadow: 0 1px 6px #000000a0;
+    cursor: grab;
+    pointer-events: auto;
+  }
+
+  .trim-track input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 24px;
+    border-radius: 5px;
+    border: none;
+    background: var(--text-color);
+    box-shadow: 0 1px 6px #000000a0;
+    cursor: grab;
+    pointer-events: auto;
+  }
+
+  .trim-info {
+    margin: 0.75rem 0 0;
+    text-align: center;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    color: #ffffffb0;
+  }
+</style>
+
+<script>
+  const MIN_GAP = 0.5;
+
+  const video = document.querySelector("#preview-video") as HTMLVideoElement;
+  const timeline = document.querySelector("#trim-timeline") as HTMLElement;
+  const fill = document.querySelector("#trim-fill") as HTMLDivElement;
+  const startInput = document.querySelector("#trim-start") as HTMLInputElement;
+  const endInput = document.querySelector("#trim-end") as HTMLInputElement;
+  const selectionLabel = document.querySelector(
+    "#trim-selection"
+  ) as HTMLSpanElement;
+
+  const state: { start: number; end: number; duration: number } = {
+    start: 0,
+    end: 0,
+    duration: 0,
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
+
+  const render = () => {
+    const { start, end, duration } = state;
+
+    startInput.value = String(start);
+    endInput.value = String(end);
+
+    if (!duration) return;
+
+    fill.style.left = `${(start / duration) * 100}%`;
+    fill.style.right = `${100 - (end / duration) * 100}%`;
+    selectionLabel.textContent = `${formatTime(start)} – ${formatTime(end)} · ${formatTime(end - start)}`;
+  };
+
+  const emitChange = () => {
+    timeline.dispatchEvent(
+      new CustomEvent("trimchange", {
+        detail: { start: state.start, end: state.end },
+        bubbles: true,
+      })
+    );
+  };
+
+  // MediaRecorder blobs report Infinity duration until seeked to the end
+  const resolveDuration = () => {
+    if (Number.isFinite(video.duration)) {
+      return Promise.resolve(video.duration);
+    }
+
+    return new Promise<number>((resolve) => {
+      const onSeeked = () => {
+        const duration = video.duration;
+        video.removeEventListener("seeked", onSeeked);
+        video.currentTime = 0;
+        resolve(duration);
+      };
+      video.addEventListener("seeked", onSeeked);
+      video.currentTime = 1e7;
+    });
+  };
+
+  video.addEventListener("loadedmetadata", async () => {
+    state.duration = 0;
+
+    const duration = await resolveDuration();
+    if (!Number.isFinite(duration) || duration <= 0) return;
+
+    state.duration = duration;
+    state.start = 0;
+    state.end = duration;
+
+    startInput.max = String(duration);
+    endInput.max = String(duration);
+    endInput.value = String(duration);
+
+    timeline.hidden = false;
+    render();
+  });
+
+  startInput.addEventListener("input", () => {
+    state.start = Math.min(Number(startInput.value), state.end - MIN_GAP);
+    render();
+    emitChange();
+  });
+
+  endInput.addEventListener("input", () => {
+    state.end = Math.max(Number(endInput.value), state.start + MIN_GAP);
+    render();
+    emitChange();
+  });
+
+
+  // Keep the preview looping inside the selected range
+  video.addEventListener("timeupdate", () => {
+    if (
+      state.duration &&
+      !timeline.hidden &&
+      video.currentTime > state.end
+    ) {
+      video.currentTime = state.start;
+    }
+  });
+</script>

@@ -10,6 +10,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.2.4"
+    "@astrojs/check": "^0.9.10",
+    "astro": "^7.2.4",
+    "mediabunny": "^1.55.2",
+    "typescript": "^6.0.3"
   }
 }

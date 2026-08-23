@@ -1,5 +1,5 @@
 ---
-
+import TrimTimeline from "./TrimTimeline.astro";
 ---
 
 <div class="side-menu" id="video-menu">
@@ -19,6 +19,7 @@
   </button>
   <h2>Previsualización y descarga</h2>
   <video id="preview-video" src="" controls></video>
+  <TrimTimeline />
   <a id="download-button" class="download-button">Descargar</a>
 </div>
 
@@ -95,10 +96,117 @@
 </style>
 
 <script>
-  const videoMenu = document.querySelector("#video-menu");
-  const closeButton = document.querySelector("#close-menu");
+  import {
+    ALL_FORMATS,
+    BlobSource,
+    BufferTarget,
+    Conversion,
+    Input,
+    Output,
+    WebMOutputFormat,
+  } from "mediabunny";
+
+  const videoMenu = document.querySelector("#video-menu") as HTMLElement;
+  const closeButton = document.querySelector("#close-menu") as HTMLButtonElement;
+  const video = document.querySelector("#preview-video") as HTMLVideoElement;
+  const downloadButton = document.querySelector(
+    "#download-button"
+  ) as HTMLAnchorElement;
+  const timeline = document.querySelector("#trim-timeline") as HTMLElement;
+
+  let trim: { start: number; end: number } = { start: 0, end: Infinity };
+  let exporting = false;
+
+  const isFullRange = () =>
+    !Number.isFinite(trim.end) ||
+    (trim.start <= 0.05 && trim.end >= video.duration - 0.05);
+
+  timeline.addEventListener("trimchange", (event) => {
+    trim = (event as CustomEvent<{ start: number; end: number }>).detail;
+    if (!exporting) {
+      downloadButton.textContent = isFullRange()
+        ? "Descargar"
+        : "Descargar recorte";
+    }
+  });
+
+  video.addEventListener("loadedmetadata", () => {
+    trim = { start: 0, end: Infinity };
+    if (!exporting) downloadButton.textContent = "Descargar";
+  });
+
+  const triggerDownload = (url: string, fileName: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 
   closeButton.addEventListener("click", () => {
     videoMenu.classList.remove("video-container-visible");
+  });
+
+  downloadButton.addEventListener("click", async (event) => {
+    if (exporting || !video.src) {
+      event.preventDefault();
+      return;
+    }
+
+    if (isFullRange()) return;
+
+    event.preventDefault();
+    exporting = true;
+    const originalLabel = downloadButton.textContent;
+
+    try {
+      downloadButton.textContent = "Preparando…";
+
+      const sourceBlob = await fetch(video.src).then((response) =>
+        response.blob(),
+      );
+
+      const input = new Input({
+        source: new BlobSource(sourceBlob),
+        formats: ALL_FORMATS,
+      });
+      const output = new Output({
+        format: new WebMOutputFormat(),
+        target: new BufferTarget(),
+      });
+
+      const conversion = await Conversion.init({
+        input,
+        output,
+        trim: { start: trim.start, end: trim.end },
+      });
+      conversion.onProgress = (progress) => {
+        downloadButton.textContent = `Exportando… ${Math.round(progress * 100)}%`;
+      };
+      await conversion.execute();
+
+      const buffer = output.target.buffer;
+      if (!buffer) throw new Error("La conversión no generó ningún dato");
+
+      const trimmedURL = URL.createObjectURL(
+        new Blob([buffer], { type: "video/webm" }),
+      );
+      const baseName = (downloadButton.download ?? "grabacion.webm").replace(
+        /\.webm$/,
+        "",
+      );
+
+      triggerDownload(trimmedURL, `${baseName}-recortado.webm`);
+      setTimeout(() => URL.revokeObjectURL(trimmedURL), 10_000);
+    } catch (error) {
+      console.error("Error al recortar el vídeo: ", error);
+      downloadButton.textContent = "Error, inténtalo de nuevo";
+    } finally {
+      exporting = false;
+      setTimeout(() => {
+        downloadButton.textContent = originalLabel;
+      }, 1500);
+    }
   });
 </script>
