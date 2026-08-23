@@ -41,6 +41,10 @@ const bitrates = {
 
 let isSupported;
 
+const OK_ICON = `<svg class="status-icon status-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4.5 4.5L19 7"/></svg>`;
+
+const KO_ICON = `<svg class="status-icon status-ko" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10m0-10L7 17"/></svg>`;
+
 document.addEventListener("DOMContentLoaded", () => {
   detectMediarecorder();
 });
@@ -54,10 +58,10 @@ const detectMediarecorder = () => {
     typeof navigator.mediaDevices.getDisplayMedia === "function";
 
   if (!apisAvailable) {
-    check.innerHTML = `<p class="text-short">Tu navegador no es compatible con esta aplicación ❌</p>`;
+    check.innerHTML = `<p class="text-short">Tu navegador no es compatible con esta aplicación ${KO_ICON}</p>`;
     isSupported = false;
   } else {
-    check.innerHTML = `<p class="text-short">Tu navegador es compatible con esta aplicación ✔️</p>`;
+    check.innerHTML = `<p class="text-short">Tu navegador es compatible con esta aplicación ${OK_ICON}</p>`;
     isSupported = true;
   }
 };
