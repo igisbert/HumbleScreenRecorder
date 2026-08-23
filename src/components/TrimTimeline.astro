@@ -99,6 +99,8 @@
 </style>
 
 <script>
+  import { formatTime } from "../assets/formatTime.js";
+
   const MIN_GAP = 0.5;
 
   const video = document.querySelector("#preview-video") as HTMLVideoElement;
@@ -113,12 +115,6 @@
     start: 0,
     end: 0,
     duration: 0,
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${String(s).padStart(2, "0")}`;
   };
 
   const render = () => {
@@ -178,6 +174,7 @@
 
     timeline.hidden = false;
     render();
+    emitChange();
   });
 
   startInput.addEventListener("input", () => {

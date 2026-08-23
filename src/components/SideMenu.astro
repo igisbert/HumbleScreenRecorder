@@ -19,7 +19,44 @@ import TrimTimeline from "./TrimTimeline.astro";
     >
   </button>
   <h2>Previsualización y descarga</h2>
-  <video id="preview-video" src="" controls></video>
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="preview-video" src=""></video>
+    <div class="video-controls">
+      <button id="play-button" aria-label="Reproducir">
+        <svg
+          id="icon-play"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+            d="M6 4l12 8l-12 8z"
+            fill="currentColor"
+            stroke-width="0"></path></svg
+        >
+        <svg
+          id="icon-pause"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          hidden
+          ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+            d="M7 5h4v14h-4zm6 0h4v14h-4z"
+            fill="currentColor"
+            stroke-width="0"></path></svg
+        >
+      </button>
+      <input
+        type="range"
+        id="seek-bar"
+        min="0"
+        max="0"
+        step="0.01"
+        value="0"
+        aria-label="Posición de reproducción"
+      />
+      <span id="playback-time">0:00 / 0:00</span>
+    </div>
+  </div>
   <TrimTimeline />
   <div class="export-options">
     <span class="export-label">Exportar en MP4</span>
@@ -51,7 +88,7 @@ import TrimTimeline from "./TrimTimeline.astro";
     border-radius: 1rem;
   }
 
-  button {
+  #close-menu {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
@@ -63,7 +100,7 @@ import TrimTimeline from "./TrimTimeline.astro";
     padding: 0;
   }
 
-  svg {
+  #close-menu svg {
     width: 2.5rem;
     height: 2.5rem;
   }
@@ -77,6 +114,91 @@ import TrimTimeline from "./TrimTimeline.astro";
     width: 100%;
     border-radius: 1rem;
     object-fit: cover;
+  }
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+
+    &:hover .video-controls,
+    &:not(.is-playing) .video-controls {
+      opacity: 1;
+    }
+  }
+
+  .video-controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.75rem 1rem 0.6rem;
+    background: linear-gradient(#00000000, #000000db);
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  #play-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    &:hover {
+      scale: 1.12;
+    }
+  }
+
+  #seek-bar {
+    flex-grow: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 5px;
+    background-color: #ffffff40;
+    border-radius: 3px;
+    cursor: pointer;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: none;
+      background: var(--text-color);
+      box-shadow: 0 1px 4px #000000a0;
+    }
+
+    &::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: none;
+      background: var(--text-color);
+      box-shadow: 0 1px 4px #000000a0;
+    }
+  }
+
+  #playback-time {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    letter-spacing: 0.5px;
+    min-width: 7ch;
+    text-align: right;
   }
 
   .download-button {
@@ -113,6 +235,7 @@ import TrimTimeline from "./TrimTimeline.astro";
 </style>
 
 <script>
+  import { formatTime } from "../assets/formatTime.js";
   import {
     ALL_FORMATS,
     BlobSource,
@@ -134,6 +257,16 @@ import TrimTimeline from "./TrimTimeline.astro";
   const mp4Switch = document.querySelector(
     "#export-mp4"
   ) as HTMLInputElement;
+  const wrapper = document.querySelector("#video-wrapper") as HTMLDivElement;
+  const playButton = document.querySelector(
+    "#play-button"
+  ) as HTMLButtonElement;
+  const iconPlay = document.querySelector("#icon-play") as SVGElement;
+  const iconPause = document.querySelector("#icon-pause") as SVGElement;
+  const seekBar = document.querySelector("#seek-bar") as HTMLInputElement;
+  const playbackTime = document.querySelector(
+    "#playback-time"
+  ) as HTMLSpanElement;
 
   let trim: { start: number; end: number } = { start: 0, end: Infinity };
   let exporting = false;
@@ -142,8 +275,31 @@ import TrimTimeline from "./TrimTimeline.astro";
     !Number.isFinite(trim.end) ||
     (trim.start <= 0.05 && trim.end >= video.duration - 0.05);
 
+  const syncPlaybackUI = () => {
+    const playing = !video.paused && !video.ended;
+
+    wrapper.classList.toggle("is-playing", playing);
+    playButton.setAttribute(
+      "aria-label",
+      playing ? "Pausar" : "Reproducir"
+    );
+    iconPlay.hidden = playing;
+    iconPause.hidden = !playing;
+  };
+
+  const renderPlaybackTime = () => {
+    const total = Number.isFinite(trim.end) ? trim.end : 0;
+    playbackTime.textContent = `${formatTime(video.currentTime)} / ${formatTime(total)}`;
+    seekBar.value = String(video.currentTime);
+  };
+
   timeline.addEventListener("trimchange", (event) => {
     trim = (event as CustomEvent<{ start: number; end: number }>).detail;
+
+    seekBar.min = String(trim.start);
+    if (Number.isFinite(trim.end)) seekBar.max = String(trim.end);
+    renderPlaybackTime();
+
     if (!exporting) {
       downloadButton.textContent = isFullRange()
         ? "Descargar"
@@ -167,6 +323,22 @@ import TrimTimeline from "./TrimTimeline.astro";
 
   closeButton.addEventListener("click", () => {
     videoMenu.classList.remove("video-container-visible");
+  });
+
+  const togglePlay = () => {
+    if (video.paused) video.play();
+    else video.pause();
+  };
+
+  playButton.addEventListener("click", togglePlay);
+  video.addEventListener("click", togglePlay);
+
+  video.addEventListener("play", syncPlaybackUI);
+  video.addEventListener("pause", syncPlaybackUI);
+  video.addEventListener("ended", syncPlaybackUI);
+  video.addEventListener("timeupdate", renderPlaybackTime);
+  seekBar.addEventListener("input", () => {
+    video.currentTime = Number(seekBar.value);
   });
 
   downloadButton.addEventListener("click", async (event) => {
