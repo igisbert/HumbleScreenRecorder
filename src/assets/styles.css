@@ -189,6 +189,44 @@ main {
 .controls {
   grid-column: span 6;
   grid-row: span 2;
+  position: relative;
+}
+
+.reopen-tab {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.95rem;
+  border: none;
+  border-radius: 999px;
+  background-color: var(--primary_color);
+  color: var(--button-color);
+  cursor: pointer;
+  box-shadow: 4px 4px 10px 3px #0000005c;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reopen-tab svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.reopen-tab.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 55%);
+  pointer-events: auto;
+}
+
+.reopen-tab:hover {
+  filter: brightness(1.2);
 }
 
 .control-button {

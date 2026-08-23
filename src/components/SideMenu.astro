@@ -269,6 +269,9 @@ import TrimTimeline from "./TrimTimeline.astro";
   const timeline = document.querySelector("#trim-timeline") as HTMLElement;
   const mp4Switch = document.querySelector("#export-mp4") as HTMLInputElement;
   const wrapper = document.querySelector("#video-wrapper") as HTMLDivElement;
+  const reopenTab = document.querySelector(
+    "#reopen-menu"
+  ) as HTMLButtonElement;
   const playButton = document.querySelector(
     "#play-button",
   ) as HTMLButtonElement;
@@ -331,6 +334,25 @@ import TrimTimeline from "./TrimTimeline.astro";
 
   closeButton.addEventListener("click", () => {
     videoMenu.classList.remove("video-container-visible");
+  });
+
+  const updateReopenButton = () => {
+    const isOpen = videoMenu.classList.contains("video-container-visible");
+    const hasVideo = video.videoWidth > 0;
+    reopenTab.classList.toggle("is-visible", hasVideo && !isOpen);
+  };
+
+  updateReopenButton();
+
+  new MutationObserver(updateReopenButton).observe(videoMenu, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  video.addEventListener("loadedmetadata", updateReopenButton);
+  video.addEventListener("emptied", updateReopenButton);
+
+  reopenTab.addEventListener("click", () => {
+    videoMenu.classList.add("video-container-visible");
   });
 
   const togglePlay = () => {
