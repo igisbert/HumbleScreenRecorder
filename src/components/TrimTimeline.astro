@@ -8,7 +8,9 @@
     <input type="range" id="trim-end" min="0" max="0" step="0.01" value="0" aria-label="Fin del recorte" />
   </div>
   <p class="trim-info">
-    <span id="trim-selection">--:--</span>
+    <span id="trim-range">--:--</span>
+    <span class="trim-separator">·</span>
+    <span id="trim-length">--:--</span>
   </p>
 </div>
 
@@ -80,11 +82,19 @@
   }
 
   .trim-info {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 1rem;
     margin: 0.75rem 0 0;
     text-align: center;
     font-size: 0.95rem;
     letter-spacing: 0.5px;
     color: #ffffffb0;
+  }
+
+  .trim-separator {
+    color: #ffffff45;
   }
 </style>
 
@@ -96,9 +106,8 @@
   const fill = document.querySelector("#trim-fill") as HTMLDivElement;
   const startInput = document.querySelector("#trim-start") as HTMLInputElement;
   const endInput = document.querySelector("#trim-end") as HTMLInputElement;
-  const selectionLabel = document.querySelector(
-    "#trim-selection"
-  ) as HTMLSpanElement;
+  const rangeLabel = document.querySelector("#trim-range") as HTMLSpanElement;
+  const lengthLabel = document.querySelector("#trim-length") as HTMLSpanElement;
 
   const state: { start: number; end: number; duration: number } = {
     start: 0,
@@ -122,7 +131,8 @@
 
     fill.style.left = `${(start / duration) * 100}%`;
     fill.style.right = `${100 - (end / duration) * 100}%`;
-    selectionLabel.textContent = `${formatTime(start)} – ${formatTime(end)} · ${formatTime(end - start)}`;
+    rangeLabel.textContent = `${formatTime(start)} – ${formatTime(end)}`;
+    lengthLabel.textContent = formatTime(end - start);
   };
 
   const emitChange = () => {
