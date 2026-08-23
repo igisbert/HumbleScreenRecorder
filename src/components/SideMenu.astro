@@ -1,4 +1,5 @@
 ---
+import Switch from "./Switch.astro";
 import TrimTimeline from "./TrimTimeline.astro";
 ---
 
@@ -20,6 +21,10 @@ import TrimTimeline from "./TrimTimeline.astro";
   <h2>Previsualización y descarga</h2>
   <video id="preview-video" src="" controls></video>
   <TrimTimeline />
+  <div class="export-options">
+    <span class="export-label">Exportar en MP4</span>
+    <Switch id="export-mp4" />
+  </div>
   <a id="download-button" class="download-button">Descargar</a>
 </div>
 
@@ -93,6 +98,18 @@ import TrimTimeline from "./TrimTimeline.astro";
     background-color: var(--primary_color);
     transform: scale(1.1);
   }
+
+  .export-options {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .export-label {
+    color: var(--text-color);
+    font-size: 1.05rem;
+  }
 </style>
 
 <script>
@@ -102,6 +119,7 @@ import TrimTimeline from "./TrimTimeline.astro";
     BufferTarget,
     Conversion,
     Input,
+    Mp4OutputFormat,
     Output,
     WebMOutputFormat,
   } from "mediabunny";
@@ -113,6 +131,9 @@ import TrimTimeline from "./TrimTimeline.astro";
     "#download-button"
   ) as HTMLAnchorElement;
   const timeline = document.querySelector("#trim-timeline") as HTMLElement;
+  const mp4Switch = document.querySelector(
+    "#export-mp4"
+  ) as HTMLInputElement;
 
   let trim: { start: number; end: number } = { start: 0, end: Infinity };
   let exporting = false;
@@ -154,13 +175,14 @@ import TrimTimeline from "./TrimTimeline.astro";
       return;
     }
 
-    if (isFullRange()) return;
+    if (isFullRange() && !mp4Switch.checked) return;
 
     event.preventDefault();
     exporting = true;
     const originalLabel = downloadButton.textContent;
 
     try {
+      const isTrimmed = !isFullRange();
       downloadButton.textContent = "Preparando…";
 
       const sourceBlob = await fetch(video.src).then((response) =>
@@ -172,14 +194,18 @@ import TrimTimeline from "./TrimTimeline.astro";
         formats: ALL_FORMATS,
       });
       const output = new Output({
-        format: new WebMOutputFormat(),
+        format: mp4Switch.checked
+          ? new Mp4OutputFormat()
+          : new WebMOutputFormat(),
         target: new BufferTarget(),
       });
+      const extension = mp4Switch.checked ? "mp4" : "webm";
+      const mimeType = mp4Switch.checked ? "video/mp4" : "video/webm";
 
       const conversion = await Conversion.init({
         input,
         output,
-        trim: { start: trim.start, end: trim.end },
+        ...(isTrimmed ? { trim: { start: trim.start, end: trim.end } } : {}),
       });
       conversion.onProgress = (progress) => {
         downloadButton.textContent = `Exportando… ${Math.round(progress * 100)}%`;
@@ -189,16 +215,19 @@ import TrimTimeline from "./TrimTimeline.astro";
       const buffer = output.target.buffer;
       if (!buffer) throw new Error("La conversión no generó ningún dato");
 
-      const trimmedURL = URL.createObjectURL(
-        new Blob([buffer], { type: "video/webm" }),
+      const exportedURL = URL.createObjectURL(
+        new Blob([buffer], { type: mimeType }),
       );
       const baseName = (downloadButton.download ?? "grabacion.webm").replace(
         /\.webm$/,
         "",
       );
+      const fileName = isTrimmed
+        ? `${baseName}-recortado.${extension}`
+        : `${baseName}.${extension}`;
 
-      triggerDownload(trimmedURL, `${baseName}-recortado.webm`);
-      setTimeout(() => URL.revokeObjectURL(trimmedURL), 10_000);
+      triggerDownload(exportedURL, fileName);
+      setTimeout(() => URL.revokeObjectURL(exportedURL), 10_000);
     } catch (error) {
       console.error("Error al recortar el vídeo: ", error);
       downloadButton.textContent = "Error, inténtalo de nuevo";

@@ -1,9 +1,13 @@
 ---
+interface Props {
+  id?: string;
+}
 
+const { id = "high-bitrate" } = Astro.props;
 ---
 
 <label class="switch">
-  <input type="checkbox" id="high-bitrate" class="checkbox" />
+  <input type="checkbox" id={id} class="checkbox" />
   <div class="slider"></div>
 </label>
 
