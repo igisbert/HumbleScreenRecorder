@@ -247,16 +247,6 @@ import TrimTimeline from "./TrimTimeline.astro";
 
 <script>
   import { formatTime } from "../assets/formatTime.js";
-  import {
-    ALL_FORMATS,
-    BlobSource,
-    BufferTarget,
-    Conversion,
-    Input,
-    Mp4OutputFormat,
-    Output,
-    WebMOutputFormat,
-  } from "mediabunny";
 
   const videoMenu = document.querySelector("#video-menu") as HTMLElement;
   const closeButton = document.querySelector(
@@ -340,7 +330,17 @@ import TrimTimeline from "./TrimTimeline.astro";
     const isOpen = videoMenu.classList.contains("video-container-visible");
     const hasVideo = video.videoWidth > 0;
     reopenTab.classList.toggle("is-visible", hasVideo && !isOpen);
+    videoMenu.inert = !isOpen;
   };
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      videoMenu.classList.contains("video-container-visible")
+    ) {
+      videoMenu.classList.remove("video-container-visible");
+    }
+  });
 
   updateReopenButton();
 
@@ -386,6 +386,17 @@ import TrimTimeline from "./TrimTimeline.astro";
     try {
       const isTrimmed = !isFullRange();
       downloadButton.textContent = "Preparando…";
+
+      const {
+        ALL_FORMATS,
+        BlobSource,
+        BufferTarget,
+        Conversion,
+        Input,
+        Mp4OutputFormat,
+        Output,
+        WebMOutputFormat,
+      } = await import("mediabunny");
 
       const sourceBlob = await fetch(video.src).then((response) =>
         response.blob(),

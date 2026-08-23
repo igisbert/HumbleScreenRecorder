@@ -1,7 +1,4 @@
 const start = document.querySelector("button#start");
-const stop = document.querySelector("button#stop");
-const video = document.querySelector("video");
-const body = document.querySelector("body");
 const led = document.querySelector(".recording-led");
 const fileName = document.querySelector("input#fileName");
 const fileNameContainer = document.querySelector(".item.nombre");
@@ -167,8 +164,6 @@ const stopButton = document.getElementById("stop");
 stopButton.addEventListener("click", () => {
   if (screenStream) {
     screenStream.getTracks().forEach((track) => track.stop());
-    /* led.classList.remove("recording-led-active");
-    start.disabled = false; */
   }
 });
 
