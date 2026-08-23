@@ -1,4 +1,4 @@
-# Grabadora de pantalla
+# Humble Screen Recorder
 
 Aplicación web para grabar la pantalla directamente desde el navegador, sin instalar nada. Permite grabar una pestaña, una ventana de aplicación o toda la pantalla, y descargar el resultado en formato **WebM**.
 
