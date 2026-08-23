@@ -189,6 +189,14 @@
     emitChange();
   });
 
+  // "change" only fires when the handle is released
+  const commitTrim = () => {
+    video.currentTime = state.start;
+  };
+
+  startInput.addEventListener("change", commitTrim);
+  endInput.addEventListener("change", commitTrim);
+
 
   // Keep the preview looping inside the selected range
   video.addEventListener("timeupdate", () => {
