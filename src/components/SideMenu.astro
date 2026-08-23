@@ -38,7 +38,7 @@ import TrimTimeline from "./TrimTimeline.astro";
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          hidden
+          class="is-hidden"
           ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
             d="M7 5h4v14h-4zm6 0h4v14h-4z"
             fill="currentColor"
@@ -86,6 +86,7 @@ import TrimTimeline from "./TrimTimeline.astro";
     padding: 1rem 2rem;
     box-shadow: 7px 7px 20px 9px #000000ad;
     border-radius: 1rem;
+    container-type: size;
   }
 
   #close-menu {
@@ -111,14 +112,19 @@ import TrimTimeline from "./TrimTimeline.astro";
   }
 
   .side-menu video {
-    width: 100%;
+    display: block;
+    max-width: 100%;
+    max-height: 100cqh;
     border-radius: 1rem;
-    object-fit: cover;
   }
 
   .video-wrapper {
     position: relative;
-    width: 100%;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 0;
+    margin-block: auto;
+    overflow: hidden;
 
     &:hover .video-controls,
     &:not(.is-playing) .video-controls {
@@ -157,6 +163,10 @@ import TrimTimeline from "./TrimTimeline.astro";
     svg {
       width: 1.5rem;
       height: 1.5rem;
+    }
+
+    .is-hidden {
+      display: none;
     }
 
     &:hover {
@@ -213,6 +223,7 @@ import TrimTimeline from "./TrimTimeline.astro";
     font-size: 2rem;
     padding: 2rem 3rem;
     margin-top: 2rem;
+    margin-bottom: 1rem;
     text-decoration: none;
   }
 
@@ -248,24 +259,24 @@ import TrimTimeline from "./TrimTimeline.astro";
   } from "mediabunny";
 
   const videoMenu = document.querySelector("#video-menu") as HTMLElement;
-  const closeButton = document.querySelector("#close-menu") as HTMLButtonElement;
+  const closeButton = document.querySelector(
+    "#close-menu",
+  ) as HTMLButtonElement;
   const video = document.querySelector("#preview-video") as HTMLVideoElement;
   const downloadButton = document.querySelector(
-    "#download-button"
+    "#download-button",
   ) as HTMLAnchorElement;
   const timeline = document.querySelector("#trim-timeline") as HTMLElement;
-  const mp4Switch = document.querySelector(
-    "#export-mp4"
-  ) as HTMLInputElement;
+  const mp4Switch = document.querySelector("#export-mp4") as HTMLInputElement;
   const wrapper = document.querySelector("#video-wrapper") as HTMLDivElement;
   const playButton = document.querySelector(
-    "#play-button"
+    "#play-button",
   ) as HTMLButtonElement;
   const iconPlay = document.querySelector("#icon-play") as SVGElement;
   const iconPause = document.querySelector("#icon-pause") as SVGElement;
   const seekBar = document.querySelector("#seek-bar") as HTMLInputElement;
   const playbackTime = document.querySelector(
-    "#playback-time"
+    "#playback-time",
   ) as HTMLSpanElement;
 
   let trim: { start: number; end: number } = { start: 0, end: Infinity };
@@ -279,12 +290,9 @@ import TrimTimeline from "./TrimTimeline.astro";
     const playing = !video.paused && !video.ended;
 
     wrapper.classList.toggle("is-playing", playing);
-    playButton.setAttribute(
-      "aria-label",
-      playing ? "Pausar" : "Reproducir"
-    );
-    iconPlay.hidden = playing;
-    iconPause.hidden = !playing;
+    playButton.setAttribute("aria-label", playing ? "Pausar" : "Reproducir");
+    iconPlay.classList.toggle("is-hidden", playing);
+    iconPause.classList.toggle("is-hidden", !playing);
   };
 
   const renderPlaybackTime = () => {
